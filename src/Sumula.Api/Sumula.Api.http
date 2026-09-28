@@ -1,0 +1,27 @@
+@api = http://localhost:5080/api/BSA/2026
+# Troque pelos IDs que aparecem em /times
+@timeA = 0
+@timeB = 0
+
+GET {{api}}/classificacao
+
+###
+GET {{api}}/classificacao?recorte=primeiroTurno
+
+###
+GET {{api}}/classificacao?recorte=segundoTurno&mando=casa
+
+###
+GET {{api}}/times
+
+###
+GET {{api}}/partidas?rodada=1
+
+###
+GET {{api}}/confronto?timeA={{timeA}}&timeB={{timeB}}
+
+###
+GET {{api}}/times/{{timeA}}
+
+###
+GET {{api}}/artilharia

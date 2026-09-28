@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Sumula.Coletor": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

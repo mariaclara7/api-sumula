@@ -1,0 +1,25 @@
+name: Coletor
+
+# Busca os dados no football-data.org e atualiza o banco.
+# Precisa dos secrets FOOTBALL_DATA_TOKEN e DATABASE_URL (Settings > Secrets and variables > Actions).
+on:
+  schedule:
+    - cron: "17 */3 * * *" # a cada 3 horas
+  workflow_dispatch: # permite rodar na mão pela aba Actions
+
+concurrency:
+  group: coletor
+  cancel-in-progress: false
+
+jobs:
+  coletar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - run: dotnet run --project src/Sumula.Coletor -c Release
+        env:
+          FootballData__Token: ${{ secrets.FOOTBALL_DATA_TOKEN }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
