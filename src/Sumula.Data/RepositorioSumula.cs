@@ -40,6 +40,17 @@ public class RepositorioSumula(SumulaDbContext db)
         return artilheiros.Select(a => a.ParaModelo()).ToList();
     }
 
+    /// <summary>Gols com minuto. Fica vazio enquanto a coleta não usa os dados detalhados.</summary>
+    public async Task<IReadOnlyList<Gol>> ObterGolsAsync(string competicao, int temporada, CancellationToken ct = default)
+    {
+        var gols = await db.Gols
+            .AsNoTracking()
+            .Where(g => db.Partidas.Any(p => p.Id == g.PartidaId && p.Competicao == competicao && p.Temporada == temporada))
+            .ToListAsync(ct);
+
+        return gols.Select(g => g.ParaModelo()).ToList();
+    }
+
     public Task<DateTimeOffset?> ObterUltimaColetaAsync(string competicao, int temporada, CancellationToken ct = default) =>
         db.Coletas
             .AsNoTracking()

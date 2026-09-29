@@ -1,4 +1,5 @@
 using Sumula.Core.Estatisticas;
+using Sumula.Core.Modelos;
 using Sumula.Data;
 
 namespace Sumula.Api;
@@ -17,26 +18,40 @@ public static class Endpoints
         });
 
         grupo.MapGet("/classificacao", async (
-            string competicao, int temporada, string? recorte, string? mando,
+            string competicao, int temporada, string? recorte, string? mando, string? tempo,
             RepositorioSumula repo, CancellationToken ct) =>
         {
             if (!TentarLer(recorte, Recorte.Geral, out var recorteEscolhido) ||
-                !TentarLer(mando, Mando.Todos, out var mandoEscolhido))
+                !TentarLer(mando, Mando.Todos, out var mandoEscolhido) ||
+                !TentarLer(tempo, Tempo.JogoTodo, out var tempoEscolhido))
                 return Results.BadRequest(new
                 {
-                    erro = "Use recorte=geral|primeiroTurno|segundoTurno e mando=todos|casa|fora.",
+                    erro = "Use recorte=geral|primeiroTurno|segundoTurno, mando=todos|casa|fora " +
+                           "e tempo=jogoTodo|primeiroTempo|segundoTempo.",
                 });
 
             var dados = await repo.ObterTemporadaAsync(Codigo(competicao), temporada, ct);
             var filtro = Filtro.DoRecorte(recorteEscolhido, dados.Times.Count, mandoEscolhido);
 
+            // "Se o jogo acabasse no intervalo" / "se só valesse o 2º tempo".
+            // Jogos sem o placar do intervalo ficam de fora desses dois recortes.
+            var partidas = dados.Partidas.Select(p => p.NoTempo(tempoEscolhido)).OfType<Partida>().ToList();
+
             return Results.Ok(new
             {
                 recorte = recorteEscolhido,
                 mando = mandoEscolhido,
+                tempo = tempoEscolhido,
                 atualizadoEm = await repo.ObterUltimaColetaAsync(Codigo(competicao), temporada, ct),
-                linhas = CalculadoraClassificacao.Calcular(dados.Times, dados.Partidas, filtro),
+                linhas = CalculadoraClassificacao.Calcular(dados.Times, partidas, filtro),
             });
+        });
+
+        grupo.MapGet("/tempos", async (string competicao, int temporada, RepositorioSumula repo, CancellationToken ct) =>
+        {
+            var dados = await repo.ObterTemporadaAsync(Codigo(competicao), temporada, ct);
+            var gols = await repo.ObterGolsAsync(Codigo(competicao), temporada, ct);
+            return Results.Ok(CalculadoraTempos.Calcular(dados.Times, dados.Partidas, gols));
         });
 
         grupo.MapGet("/partidas", async (

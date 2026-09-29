@@ -114,9 +114,39 @@ public class Coletor(
             entidade.VisitanteId = partida.AwayTeam.Id!.Value;
             entidade.GolsMandante = partida.Score.FullTime.Home;
             entidade.GolsVisitante = partida.Score.FullTime.Away;
+            entidade.GolsMandanteIntervalo = partida.Score.HalfTime?.Home;
+            entidade.GolsVisitanteIntervalo = partida.Score.HalfTime?.Away;
         }
 
+        await SalvarGolsAsync(validas, ct);
         return validas.Count;
+    }
+
+    /// <summary>Só roda com os dados detalhados; no plano gratuito as partidas vêm sem a lista de gols.</summary>
+    private async Task SalvarGolsAsync(List<PartidaFd> partidas, CancellationToken ct)
+    {
+        var comGols = partidas.Where(p => p.Goals is not null).ToList();
+        if (comGols.Count == 0)
+            return;
+
+        var ids = comGols.Select(p => p.Id).ToList();
+        await db.Gols.Where(g => ids.Contains(g.PartidaId)).ExecuteDeleteAsync(ct);
+
+        foreach (var partida in comGols)
+        {
+            foreach (var gol in Conversao.Gols(partida))
+            {
+                db.Gols.Add(new GolEntidade
+                {
+                    PartidaId = partida.Id,
+                    Minuto = gol.Minuto,
+                    Acrescimo = gol.Acrescimo,
+                    TimeId = gol.TimeId,
+                    Tipo = gol.Tipo,
+                    Autor = gol.Autor,
+                });
+            }
+        }
     }
 
     private async Task SalvarArtilhariaAsync(string competicao, int temporada, List<ArtilheiroFd> artilheiros, CancellationToken ct)

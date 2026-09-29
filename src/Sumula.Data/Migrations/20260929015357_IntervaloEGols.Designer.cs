@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Sumula.Data;
@@ -11,9 +12,11 @@ using Sumula.Data;
 namespace Sumula.Data.Migrations
 {
     [DbContext(typeof(SumulaDbContext))]
-    partial class SumulaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260929015357_IntervaloEGols")]
+    partial class IntervaloEGols
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

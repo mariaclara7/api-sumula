@@ -36,9 +36,25 @@ public class PartidaEntidade
     public int VisitanteId { get; set; }
     public int? GolsMandante { get; set; }
     public int? GolsVisitante { get; set; }
+    public int? GolsMandanteIntervalo { get; set; }
+    public int? GolsVisitanteIntervalo { get; set; }
 
     public Partida ParaModelo() =>
-        new(Id, Rodada, Data, Status, MandanteId, VisitanteId, GolsMandante, GolsVisitante);
+        new(Id, Rodada, Data, Status, MandanteId, VisitanteId, GolsMandante, GolsVisitante,
+            GolsMandanteIntervalo, GolsVisitanteIntervalo);
+}
+
+public class GolEntidade
+{
+    public int Id { get; set; }
+    public int PartidaId { get; set; }
+    public int Minuto { get; set; }
+    public int? Acrescimo { get; set; }
+    public int TimeId { get; set; }
+    public TipoGol Tipo { get; set; }
+    public string? Autor { get; set; }
+
+    public Gol ParaModelo() => new(PartidaId, Minuto, Acrescimo, TimeId, Tipo);
 }
 
 public class ArtilheiroEntidade

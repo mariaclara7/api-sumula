@@ -10,6 +10,7 @@ public class SumulaDbContext(DbContextOptions<SumulaDbContext> options) : DbCont
     public DbSet<PartidaEntidade> Partidas => Set<PartidaEntidade>();
     public DbSet<ArtilheiroEntidade> Artilheiros => Set<ArtilheiroEntidade>();
     public DbSet<ColetaEntidade> Coletas => Set<ColetaEntidade>();
+    public DbSet<GolEntidade> Gols => Set<GolEntidade>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -45,6 +46,14 @@ public class SumulaDbContext(DbContextOptions<SumulaDbContext> options) : DbCont
         {
             e.ToTable("coletas");
             e.HasIndex(c => new { c.Competicao, c.Temporada, c.ExecutadaEm });
+        });
+
+        modelBuilder.Entity<GolEntidade>(e =>
+        {
+            e.ToTable("gols");
+            e.Property(g => g.Tipo).HasConversion<string>();
+            e.HasIndex(g => g.PartidaId);
+            e.HasOne<PartidaEntidade>().WithMany().HasForeignKey(g => g.PartidaId).OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

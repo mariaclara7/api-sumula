@@ -28,6 +28,10 @@ builder.Services.AddHttpClient<ClienteFootballData>(http =>
 {
     http.BaseAddress = new Uri(builder.Configuration["FootballData:UrlBase"] ?? ClienteFootballData.UrlBase);
     http.DefaultRequestHeaders.Add("X-Auth-Token", token);
+
+    // Com o plano "Free + Deep Data" as partidas passam a trazer os gols com minuto.
+    if (builder.Configuration.GetValue<bool>("FootballData:DadosDetalhados"))
+        http.DefaultRequestHeaders.Add("X-Unfold-Goals", "true");
 });
 builder.Services.AddScoped<Coletor>();
 

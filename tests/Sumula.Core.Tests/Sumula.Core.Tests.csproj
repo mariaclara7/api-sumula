@@ -25,6 +25,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sumula.Core\Sumula.Core.csproj" />
     <ProjectReference Include="..\..\src\Sumula.Data\Sumula.Data.csproj" />
+    <ProjectReference Include="..\..\src\Sumula.Coletor\Sumula.Coletor.csproj" />
   </ItemGroup>
 
 </Project>

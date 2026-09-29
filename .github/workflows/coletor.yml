@@ -2,6 +2,8 @@ name: Coletor
 
 # Busca os dados no football-data.org e atualiza o banco.
 # Precisa dos secrets FOOTBALL_DATA_TOKEN e DATABASE_URL (Settings > Secrets and variables > Actions).
+# Com o plano "Free + Deep Data", crie também a *variável* FOOTBALL_DATA_DETALHADO = true para coletar
+# os gols com minuto.
 on:
   schedule:
     - cron: "17 */3 * * *" # a cada 3 horas
@@ -23,3 +25,4 @@ jobs:
         env:
           FootballData__Token: ${{ secrets.FOOTBALL_DATA_TOKEN }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          FootballData__DadosDetalhados: ${{ vars.FOOTBALL_DATA_DETALHADO || 'false' }}

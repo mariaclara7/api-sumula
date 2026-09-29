@@ -56,7 +56,8 @@ Série A no football-data.org.
 
 | Rota | Descrição |
 |---|---|
-| `GET /classificacao?recorte=geral\|primeiroTurno\|segundoTurno&mando=todos\|casa\|fora` | Tabela com pontos, jogos, V/E/D, gols, saldo, aproveitamento e últimos 5 resultados. |
+| `GET /classificacao?recorte=geral\|primeiroTurno\|segundoTurno&mando=todos\|casa\|fora&tempo=jogoTodo\|primeiroTempo\|segundoTempo` | Tabela com pontos, jogos, V/E/D, gols, saldo, aproveitamento e últimos 5 resultados. `tempo` monta a tabela "se o jogo acabasse no intervalo" ou "se só valesse o 2º tempo". |
+| `GET /tempos` | 1º x 2º tempo de cada time: gols por tempo, viradas, pontos ganhos/perdidos depois do intervalo e a matriz "intervalo → final". Com dados detalhados, também os gols por faixa de 15 minutos (veja abaixo). |
 | `GET /times` | Times da competição. |
 | `GET /times/{id}` | Resumo do time: geral, casa, fora, 1º e 2º turno, evolução por rodada, últimas e próximas partidas. |
 | `GET /confronto?timeA={id}&timeB={id}` | Confronto direto na temporada. |
@@ -87,6 +88,20 @@ time termina. O placar de cada jogo é sorteado por uma distribuição de Poisso
 A resposta traz, para cada time, a chance de terminar em cada posição (`posicoes[0]` é o 1º lugar). O site soma
 essas chances pelas faixas da tabela (título, Libertadores, rebaixamento...), então as faixas ficam definidas em um
 lugar só, no front.
+
+### 1º x 2º tempo e gols por faixa de minuto
+
+O plano gratuito do football-data.org traz o placar do intervalo, e é dele que saem as estatísticas por tempo.
+O minuto de cada gol só vem no plano **Free + Deep Data** (€29/mês). Para usá-lo, defina
+`FootballData__DadosDetalhados=true` no coletor. No GitHub Actions basta criar a *variável* de repositório
+`FOOTBALL_DATA_DETALHADO` com o valor `true` (em *Settings → Secrets and variables → Actions → Variables*). O coletor
+passa a pedir os gols (cabeçalho `X-Unfold-Goals`) e grava cada um na tabela `gols`. A partir daí, `/tempos` responde
+`temFaixas: true` e traz os gols marcados e sofridos em cada faixa: 1–15, 16–30, 31–45+, 46–60, 61–75 e 76–90+.
+
+O time que marcou é deduzido do placar logo depois de cada gol, então gol contra conta para o time certo.
+
+> A leitura dos gols foi testada com dados no formato da documentação do football-data.org, não com a API real
+> (que exige o plano pago). Na primeira coleta com o plano, confira se os totais de `/tempos` batem com a tabela.
 
 ## Publicação (tudo gratuito)
 
