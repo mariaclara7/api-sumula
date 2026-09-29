@@ -79,6 +79,16 @@ public static class Endpoints
             return Results.Ok(evolucao.Select(par => new { timeId = par.Key, rodadas = par.Value }));
         });
 
+        grupo.MapGet("/probabilidades", async (string competicao, int temporada, RepositorioSumula repo, CancellationToken ct) =>
+        {
+            var dados = await repo.ObterTemporadaAsync(Codigo(competicao), temporada, ct);
+
+            // A semente depende só dos jogos já disputados: enquanto nada muda, o resultado
+            // é o mesmo e os percentuais não "tremem" a cada atualização do cache.
+            var semente = dados.Partidas.Count(p => p.TemResultado);
+            return Results.Ok(SimuladorCampeonato.Simular(dados.Times, dados.Partidas, semente: semente));
+        });
+
         grupo.MapGet("/artilharia", async (string competicao, int temporada, RepositorioSumula repo, CancellationToken ct) =>
             Results.Ok(await repo.ObterArtilhariaAsync(Codigo(competicao), temporada, ct)));
     }

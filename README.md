@@ -62,6 +62,7 @@ Série A no football-data.org.
 | `GET /confronto?timeA={id}&timeB={id}` | Confronto direto na temporada. |
 | `GET /partidas?rodada={n}&timeId={id}` | Partidas (filtros opcionais). |
 | `GET /evolucao` | Posição e pontos de todos os times ao fim de cada rodada. |
+| `GET /probabilidades` | Chance de cada time terminar em cada posição, pontos e posição esperados (veja abaixo). |
 | `GET /artilharia` | Artilheiros (gols, assistências e pênaltis). |
 | `GET /health` | Verificação de saúde (fora do prefixo `/api`). |
 
@@ -72,6 +73,20 @@ As respostas ficam 5 minutos em cache, já que os dados só mudam quando o colet
 Pontos, vitórias, saldo de gols, gols pró e confronto direto (só quando o empate é entre dois clubes), como no
 regulamento do Brasileirão. Cartões vermelhos e amarelos não estão disponíveis no plano gratuito, então o último
 critério é o nome do time.
+
+### Probabilidades
+
+`SimuladorCampeonato` joga os jogos restantes 10.000 vezes (método de Monte Carlo) e conta em que posição cada
+time termina. O placar de cada jogo é sorteado por uma distribuição de Poisson, com a média de gols calculada assim:
+
+- **Força de ataque** = gols marcados por jogo ÷ média da liga; **força de defesa** = gols sofridos por jogo ÷ média
+  da liga. As duas são puxadas para a média com um peso de 5 jogos, para o começo do campeonato não exagerar.
+- **Gols esperados do mandante** = média de gols dos mandantes na liga × ataque do mandante × defesa do visitante
+  (e o equivalente para o visitante). Assim a vantagem de jogar em casa entra pelos próprios dados.
+
+A resposta traz, para cada time, a chance de terminar em cada posição (`posicoes[0]` é o 1º lugar). O site soma
+essas chances pelas faixas da tabela (título, Libertadores, rebaixamento...), então as faixas ficam definidas em um
+lugar só, no front.
 
 ## Publicação (tudo gratuito)
 
