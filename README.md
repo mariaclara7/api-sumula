@@ -8,21 +8,34 @@ Os dados vêm do plano gratuito do [football-data.org](https://www.football-data
 ## Como funciona
 
 ```
-GitHub Actions (a cada 3h) ─► Sumula.Coletor ─► football-data.org
-                                    │
-                                    ▼
-                              Postgres (Neon)
-                                    ▲
-                    Sumula.Api ─────┘  ◄── site (repositório sumula)
+GitHub Actions (a cada 3h)
+   │
+   ├─► Sumula.Coletor ──► football-data.org
+   │        │
+   │        ▼
+   │   Postgres (Neon)
+   │        │
+   ├─► Sumula.Exportador: sobe a Sumula.Api em memória, chama cada endereço
+   │   que o site usa e grava as respostas como arquivos .json
+   │        │
+   └─► wrangler deploy ──► Cloudflare Worker "sumula-dados" (só arquivos estáticos)
+                                   ▲
+                    site (repositório sumula) lê os .json
 ```
+
+Como os dados só mudam quando o coletor roda, a API é "pré-calculada": em produção não há servidor .NET
+ligado, só arquivos na Cloudflare. A `Sumula.Api` continua sendo a fonte da verdade (o exportador chama ela
+mesma) e é usada ao vivo no desenvolvimento.
 
 | Projeto | O que faz |
 |---|---|
-| `src/Sumula.Core` | Modelos e cálculos (classificação, turnos, confronto direto, evolução, resumo do time). Não depende de banco nem de API. |
+| `src/Sumula.Core` | Modelos e cálculos (classificação, turnos, confronto direto, evolução, simulação, palpites...). Não depende de banco nem de API. |
 | `src/Sumula.Data` | EF Core + Postgres: entidades, migrations e consultas. |
 | `src/Sumula.Coletor` | Programa de linha de comando que busca os dados no football-data.org e grava no banco. Aplica as migrations ao iniciar. |
-| `src/Sumula.Api` | API HTTP (ASP.NET Minimal API) consumida pelo site. |
-| `tests/Sumula.Core.Tests` | Testes dos cálculos (xUnit). |
+| `src/Sumula.Api` | API HTTP (ASP.NET Minimal API). |
+| `src/Sumula.Exportador` | Gera os arquivos estáticos da API (`RotasEstaticas` lista os endereços e dá nome a cada arquivo). |
+| `publicacao/` | Configuração do Worker `sumula-dados` na Cloudflare. |
+| `tests/Sumula.Core.Tests` | Testes (xUnit). |
 
 ## Rodando na sua máquina
 
@@ -115,20 +128,27 @@ O time que marcou é deduzido do placar logo depois de cada gol, então gol cont
 > A leitura dos gols foi testada com dados no formato da documentação do football-data.org, não com a API real
 > (que exige o plano pago). Na primeira coleta com o plano, confira se os totais de `/tempos` batem com a tabela.
 
-## Publicação (tudo gratuito)
+## Publicação
 
-1. **Banco:** crie um projeto no [Neon](https://neon.tech) e copie a connection string
-   (`postgresql://...`). O formato URL é aceito direto.
-2. **Coletor:** em *Settings → Secrets and variables → Actions* deste repositório, crie os secrets
-   `FOOTBALL_DATA_TOKEN` e `DATABASE_URL`. O workflow `Coletor` roda a cada 3 horas e pode ser disparado
-   manualmente na aba *Actions*.
-3. **API:** no [Render](https://render.com), crie um *Web Service* a partir deste repositório usando o
-   `Dockerfile`, com as variáveis:
-   - `DATABASE_URL`: a mesma connection string do Neon
-   - `Cors__Origens__0`: o endereço do site (ex.: `https://sumula.pages.dev`)
+Tudo gratuito, a não ser o domínio. O passo a passo completo (Cloudflare, Neon, domínio) está no README do
+repositório [sumula](https://github.com/mariaclara7/sumula#publicação). Resumo do que este repositório precisa:
 
-   No plano gratuito o Render desliga a API após 15 minutos sem acesso. A primeira requisição depois disso
-   pode levar ~30s.
+- **Secrets** (*Settings → Secrets and variables → Actions*): `FOOTBALL_DATA_TOKEN`, `DATABASE_URL` (Neon),
+  `CLOUDFLARE_API_TOKEN` e `CLOUDFLARE_ACCOUNT_ID`.
+- O workflow **Coletor** roda a cada 3 horas (ou na mão, na aba *Actions*): coleta, gera os arquivos e publica o
+  Worker `sumula-dados`.
+
+### Nome dos arquivos
+
+`api/{competicao}/{temporada}{caminho}` seguido de `__{chave}-{valor}` para cada parâmetro, em ordem alfabética da
+chave, e `.json`. Ex.: `/classificacao?recorte=geral&mando=todos&tempo=jogoTodo` vira
+`api/BSA/2026/classificacao__mando-todos__recorte-geral__tempo-jogoTodo.json`. A mesma regra está no site
+(`src/api/rotas.ts`); os testes dos dois lados usam os mesmos exemplos.
+
+### Alternativa: API ao vivo
+
+O `Dockerfile` continua aqui para rodar a `Sumula.Api` como servidor (Render, Cloudflare Containers etc.), se um
+dia for preciso algo que não dá para pré-calcular.
 
 > O GitHub pausa workflows agendados em repositórios sem commits há 60 dias. Se o coletor parar, reative-o na
 > aba *Actions*.

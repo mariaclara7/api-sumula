@@ -1,9 +1,12 @@
 name: Coletor
 
-# Busca os dados no football-data.org e atualiza o banco.
-# Precisa dos secrets FOOTBALL_DATA_TOKEN e DATABASE_URL (Settings > Secrets and variables > Actions).
-# Com o plano "Free + Deep Data", crie também a *variável* FOOTBALL_DATA_DETALHADO = true para coletar
-# os gols com minuto.
+# Busca os dados no football-data.org, atualiza o banco, gera a "API pré-calculada" (arquivos .json)
+# e publica na Cloudflare como o Worker "sumula-dados".
+#
+# Secrets (Settings > Secrets and variables > Actions > Secrets):
+#   FOOTBALL_DATA_TOKEN, DATABASE_URL, CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID
+# Variável opcional (aba Variables): FOOTBALL_DATA_DETALHADO = true com o plano "Free + Deep Data",
+# para coletar os gols com minuto.
 on:
   schedule:
     - cron: "17 */3 * * *" # a cada 3 horas
@@ -16,13 +19,28 @@ concurrency:
 jobs:
   coletar:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-      - run: dotnet run --project src/Sumula.Coletor -c Release
+
+      - name: Coleta os dados
+        run: dotnet run --project src/Sumula.Coletor -c Release
         env:
           FootballData__Token: ${{ secrets.FOOTBALL_DATA_TOKEN }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
           FootballData__DadosDetalhados: ${{ vars.FOOTBALL_DATA_DETALHADO || 'false' }}
+
+      - name: Gera os arquivos da API
+        run: dotnet run --project src/Sumula.Exportador -c Release
+        env:
+          Exportacao__Saida: ${{ github.workspace }}/publicacao/saida
+
+      - name: Publica na Cloudflare
+        working-directory: publicacao
+        run: npx --yes wrangler@4 deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

@@ -1,0 +1,13 @@
+// Worker só com arquivos estáticos: os JSON gerados pelo Sumula.Exportador.
+// Publicado pelo workflow "Coletor" depois de cada coleta (npx wrangler deploy dentro desta pasta).
+{
+  "name": "sumula-dados",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "directory": "./saida",
+    // Endereço que não existe responde 404 (não há página de fallback: aqui só há dados).
+    "not_found_handling": "none"
+  }
+  // Depois que o domínio estiver na Cloudflare, descomente para servir em dados.<domínio>:
+  // , "routes": [{ "pattern": "dados.sumula.com.br", "custom_domain": true }]
+}
