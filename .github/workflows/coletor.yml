@@ -22,23 +22,43 @@ jobs:
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
     steps:
+      # Sem os secrets, o workflow termina sem erro e avisa o que falta (em vez de falhar a cada 3 horas).
+      - name: Verifica a configuração
+        id: config
+        run: |
+          faltam=""
+          [ -z "$DATABASE_URL" ] && faltam="$faltam DATABASE_URL"
+          [ -z "$FD_TOKEN" ] && faltam="$faltam FOOTBALL_DATA_TOKEN"
+          if [ -z "$faltam" ]; then echo "coleta=true" >> "$GITHUB_OUTPUT"
+          else echo "::notice::Faltam os secrets:$faltam. A coleta não vai rodar (veja o README)."; fi
+          if [ -n "$CF_TOKEN" ] && [ -n "$CF_CONTA" ]; then echo "cloudflare=true" >> "$GITHUB_OUTPUT"
+          else echo "::notice::Faltam CLOUDFLARE_API_TOKEN e CLOUDFLARE_ACCOUNT_ID: os dados não serão publicados."; fi
+        env:
+          FD_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_CONTA: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       - uses: actions/checkout@v4
+        if: steps.config.outputs.coleta == 'true'
       - uses: actions/setup-dotnet@v4
+        if: steps.config.outputs.coleta == 'true'
         with:
           dotnet-version: 8.0.x
 
       - name: Coleta os dados
+        if: steps.config.outputs.coleta == 'true'
         run: dotnet run --project src/Sumula.Coletor -c Release
         env:
           FootballData__Token: ${{ secrets.FOOTBALL_DATA_TOKEN }}
           FootballData__DadosDetalhados: ${{ vars.FOOTBALL_DATA_DETALHADO || 'false' }}
 
       - name: Gera os arquivos da API
+        if: steps.config.outputs.coleta == 'true'
         run: dotnet run --project src/Sumula.Exportador -c Release
         env:
           Exportacao__Saida: ${{ github.workspace }}/publicacao/saida
 
       - name: Publica na Cloudflare
+        if: steps.config.outputs.coleta == 'true' && steps.config.outputs.cloudflare == 'true'
         working-directory: publicacao
         run: npx --yes wrangler@4 deploy
         env:
