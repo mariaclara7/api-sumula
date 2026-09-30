@@ -87,6 +87,34 @@ public static class Endpoints
             return Results.Ok(CalculadoraConfronto.Resumir(timeA.Value, timeB.Value, dados.Partidas));
         });
 
+        grupo.MapGet("/palpites", async (
+            string competicao, int temporada, int? rodada, int? timeId,
+            RepositorioSumula repo, CancellationToken ct) =>
+        {
+            var dados = await repo.ObterTemporadaAsync(Codigo(competicao), temporada, ct);
+            var filtradas = dados.Partidas
+                .Where(p => rodada is null || p.Rodada == rodada)
+                .Where(p => timeId is null || p.Envolve(timeId.Value))
+                .Select(p => p.Id)
+                .ToHashSet();
+
+            // O modelo usa todos os jogos da temporada; o filtro só escolhe quais palpites devolver.
+            var palpites = CalculadoraPalpite.Calcular(dados.Times, dados.Partidas).Where(p => filtradas.Contains(p.PartidaId));
+            return Results.Ok(palpites);
+        });
+
+        grupo.MapGet("/matematica", async (string competicao, int temporada, RepositorioSumula repo, CancellationToken ct) =>
+        {
+            var dados = await repo.ObterTemporadaAsync(Codigo(competicao), temporada, ct);
+            return Results.Ok(CalculadoraMatematica.Calcular(dados.Times, dados.Partidas));
+        });
+
+        grupo.MapGet("/estatisticas", async (string competicao, int temporada, RepositorioSumula repo, CancellationToken ct) =>
+        {
+            var dados = await repo.ObterTemporadaAsync(Codigo(competicao), temporada, ct);
+            return Results.Ok(CalculadoraEstatisticas.Calcular(dados.Times, dados.Partidas));
+        });
+
         grupo.MapGet("/evolucao", async (string competicao, int temporada, RepositorioSumula repo, CancellationToken ct) =>
         {
             var dados = await repo.ObterTemporadaAsync(Codigo(competicao), temporada, ct);

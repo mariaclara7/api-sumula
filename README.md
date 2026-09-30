@@ -63,6 +63,9 @@ Série A no football-data.org.
 | `GET /confronto?timeA={id}&timeB={id}` | Confronto direto na temporada. |
 | `GET /partidas?rodada={n}&timeId={id}` | Partidas (filtros opcionais). |
 | `GET /evolucao` | Posição e pontos de todos os times ao fim de cada rodada. |
+| `GET /palpites?rodada={n}&timeId={id}` | Palpite de cada jogo que falta: chances de vitória do mandante, empate e vitória do visitante, gols esperados e placar mais provável (filtros opcionais). |
+| `GET /matematica` | O que já está decidido: melhor e pior posição possível de cada time e quantos pontos garantem terminar entre os k primeiros (`pontosParaGarantir[k-1]`). |
+| `GET /estatisticas` | Perfil de gols de cada time (jogos sem sofrer gol, sem marcar, mais de 2,5 gols, ambos marcam), sequências atuais e maiores da temporada, e o resumo da liga. |
 | `GET /probabilidades` | Chance de cada time terminar em cada posição, pontos e posição esperados (veja abaixo). |
 | `GET /artilharia` | Artilheiros (gols, assistências e pênaltis). |
 | `GET /health` | Verificação de saúde (fora do prefixo `/api`). |
@@ -84,6 +87,15 @@ time termina. O placar de cada jogo é sorteado por uma distribuição de Poisso
   da liga. As duas são puxadas para a média com um peso de 5 jogos, para o começo do campeonato não exagerar.
 - **Gols esperados do mandante** = média de gols dos mandantes na liga × ataque do mandante × defesa do visitante
   (e o equivalente para o visitante). Assim a vantagem de jogar em casa entra pelos próprios dados.
+
+O mesmo modelo de gols (`ModeloGols`) alimenta o palpite de cada jogo em `/palpites`: em vez de sortear, soma a
+probabilidade de todos os placares de 0 × 0 a 10 × 10.
+
+### Matemática
+
+`/matematica` é conservador de propósito: considera que cada adversário pode vencer todos os jogos que faltam
+(mesmo quando dois deles ainda se enfrentam) e que empate em pontos pode ser decidido contra o time. Assim, nunca
+diz "garantido" antes da hora; pode dizer uma rodada depois de uma conta que considerasse os confrontos entre eles.
 
 A resposta traz, para cada time, a chance de terminar em cada posição (`posicoes[0]` é o 1º lugar). O site soma
 essas chances pelas faixas da tabela (título, Libertadores, rebaixamento...), então as faixas ficam definidas em um

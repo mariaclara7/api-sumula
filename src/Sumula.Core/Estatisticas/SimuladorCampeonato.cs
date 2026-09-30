@@ -22,20 +22,11 @@ public sealed record ResultadoSimulacao(
 /// </summary>
 /// <remarks>
 /// O placar de cada jogo é sorteado por uma distribuição de Poisson, com a média de gols de cada lado
-/// calculada a partir do ataque e da defesa dos times na temporada e da vantagem de jogar em casa.
-/// Com poucos jogos, as forças são puxadas para a média da liga, para um início de campeonato
-/// não dominar a previsão.
+/// dada pelo <see cref="ModeloGols"/>.
 /// </remarks>
 public static class SimuladorCampeonato
 {
     public const int SimulacoesPadrao = 10_000;
-
-    /// <summary>Peso, em jogos, da média da liga nas forças de cada time.</summary>
-    private const double JogosDeRegularizacao = 5;
-
-    // Médias históricas aproximadas do Brasileirão, usadas antes da primeira rodada.
-    private const double GolsMandantePadrao = 1.4;
-    private const double GolsVisitantePadrao = 1.0;
 
     public static ResultadoSimulacao Simular(
         IReadOnlyCollection<Time> times,
@@ -49,19 +40,14 @@ public static class SimuladorCampeonato
             return new ResultadoSimulacao(simulacoes, 0, []);
 
         var indicePorTime = tabela.Select((linha, indice) => (linha.Time.Id, indice)).ToDictionary(x => x.Id, x => x.indice);
-        var forcas = EstimarForcas(tabela, partidas);
+        var modelo = ModeloGols.Estimar(times, partidas);
         var restantes = partidas
             .Where(p => !p.TemResultado && p.Status != StatusPartida.Cancelada)
             .Where(p => indicePorTime.ContainsKey(p.MandanteId) && indicePorTime.ContainsKey(p.VisitanteId))
             .Select(p =>
             {
-                var mandante = indicePorTime[p.MandanteId];
-                var visitante = indicePorTime[p.VisitanteId];
-                return new JogoRestante(
-                    mandante,
-                    visitante,
-                    forcas.MediaMandante * forcas.Ataque[mandante] * forcas.Defesa[visitante],
-                    forcas.MediaVisitante * forcas.Ataque[visitante] * forcas.Defesa[mandante]);
+                var (golsMandante, golsVisitante) = modelo.GolsEsperados(p.MandanteId, p.VisitanteId);
+                return new JogoRestante(indicePorTime[p.MandanteId], indicePorTime[p.VisitanteId], golsMandante, golsVisitante);
             })
             .ToArray();
 
@@ -164,29 +150,6 @@ public static class SimuladorCampeonato
 
         return gols;
     }
-
-    private static Forcas EstimarForcas(IReadOnlyList<LinhaClassificacao> tabela, IEnumerable<Partida> partidas)
-    {
-        var jogadas = partidas.Where(p => p.TemResultado).ToList();
-        var mediaMandante = jogadas.Count > 0 ? jogadas.Average(p => (double)p.GolsMandante!.Value) : GolsMandantePadrao;
-        var mediaVisitante = jogadas.Count > 0 ? jogadas.Average(p => (double)p.GolsVisitante!.Value) : GolsVisitantePadrao;
-
-        // Um jogo sem gols em toda a liga deixaria a média zerada e todas as forças indefinidas.
-        mediaMandante = Math.Max(mediaMandante, 0.2);
-        mediaVisitante = Math.Max(mediaVisitante, 0.2);
-        var mediaPorTime = (mediaMandante + mediaVisitante) / 2;
-
-        double Forca(int gols, int jogos) =>
-            (gols + JogosDeRegularizacao * mediaPorTime) / (jogos + JogosDeRegularizacao) / mediaPorTime;
-
-        return new Forcas(
-            mediaMandante,
-            mediaVisitante,
-            tabela.Select(l => Forca(l.GolsPro, l.Jogos)).ToArray(),
-            tabela.Select(l => Forca(l.GolsContra, l.Jogos)).ToArray());
-    }
-
-    private sealed record Forcas(double MediaMandante, double MediaVisitante, double[] Ataque, double[] Defesa);
 
     private sealed record JogoRestante(int Mandante, int Visitante, double MediaMandante, double MediaVisitante);
 }
