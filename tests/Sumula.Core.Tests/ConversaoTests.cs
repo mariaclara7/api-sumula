@@ -39,4 +39,24 @@ public class ConversaoTests
 
         Assert.Empty(gols);
     }
+
+    [Theory]
+    [InlineData("CA Paranaense", "Paranaense", "CAP", "Athletico-PR", "CAP")]
+    [InlineData("Clube do Remo", null, "REM", "Remo", "REM")]
+    [InlineData("São Paulo FC", "Sao Paulo", "SPF", "Sao Paulo", "SAO")]
+    [InlineData("SE Palmeiras", "Palmeiras", "PAL", "Palmeiras", "PAL")]
+    public void Ajusta_nome_curto_e_sigla_dos_clubes(
+        string nome, string? nomeCurto, string sigla, string nomeCurtoEsperado, string siglaEsperada)
+    {
+        var nomes = Conversao.Nomes(new TimeFd(1, nome, nomeCurto, sigla, null));
+
+        Assert.Equal(new Conversao.NomesTime(nome, nomeCurtoEsperado, siglaEsperada), nomes);
+    }
+
+    [Fact]
+    public void Sem_nome_curto_nem_sigla_usa_o_nome()
+    {
+        Assert.Equal(new Conversao.NomesTime("Mirassol FC", "Mirassol FC", "MIR"),
+            Conversao.Nomes(new TimeFd(1, "Mirassol FC", null, null, null)));
+    }
 }

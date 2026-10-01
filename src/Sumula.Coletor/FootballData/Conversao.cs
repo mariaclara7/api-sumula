@@ -1,9 +1,38 @@
+using System.Globalization;
 using Sumula.Core.Modelos;
 
 namespace Sumula.Coletor.FootballData;
 
 public static class Conversao
 {
+    public sealed record NomesTime(string Nome, string NomeCurto, string Sigla);
+
+    private sealed record Ajuste(string? NomeCurto = null, string? Sigla = null);
+
+    /// <summary>
+    /// Como os clubes são chamados por aqui, quando o football-data.org usa outro nome curto ou sigla.
+    /// A chave é o nome curto (ou o nome completo) da fonte, sem diferenciar maiúsculas nem acentos.
+    /// </summary>
+    private static readonly Dictionary<string, Ajuste> Ajustes = new(
+        StringComparer.Create(CultureInfo.InvariantCulture, CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace))
+    {
+        ["Paranaense"] = new(NomeCurto: "Athletico-PR"),
+        ["Clube do Remo"] = new(NomeCurto: "Remo"),
+        ["São Paulo"] = new(Sigla: "SAO"),
+    };
+
+    public static NomesTime Nomes(TimeFd time)
+    {
+        var nome = time.Name ?? time.ShortName ?? $"Time {time.Id}";
+        var nomeCurto = time.ShortName ?? nome;
+        var sigla = time.Tla ?? nomeCurto[..Math.Min(3, nomeCurto.Length)].ToUpperInvariant();
+
+        if (Ajustes.TryGetValue(nomeCurto, out var ajuste) || Ajustes.TryGetValue(nome, out ajuste))
+            return new NomesTime(nome, ajuste.NomeCurto ?? nomeCurto, ajuste.Sigla ?? sigla);
+
+        return new NomesTime(nome, nomeCurto, sigla);
+    }
+
     public static StatusPartida Status(string status) => status switch
     {
         "FINISHED" or "AWARDED" => StatusPartida.Encerrada,

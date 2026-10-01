@@ -80,9 +80,10 @@ public class Coletor(
                 db.Times.Add(entidade);
             }
 
-            entidade.Nome = time.Name ?? time.ShortName ?? $"Time {id}";
-            entidade.NomeCurto = time.ShortName ?? entidade.Nome;
-            entidade.Sigla = time.Tla ?? entidade.NomeCurto[..Math.Min(3, entidade.NomeCurto.Length)].ToUpperInvariant();
+            var nomes = Conversao.Nomes(time);
+            entidade.Nome = nomes.Nome;
+            entidade.NomeCurto = nomes.NomeCurto;
+            entidade.Sigla = nomes.Sigla;
             entidade.Escudo = time.Crest;
 
             if (!participantes.Contains(id))
