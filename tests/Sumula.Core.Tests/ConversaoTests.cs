@@ -42,7 +42,12 @@ public class ConversaoTests
 
     [Theory]
     [InlineData("CA Paranaense", "Paranaense", "CAP", "Athletico-PR", "CAP")]
-    [InlineData("Clube do Remo", null, "REM", "Remo", "REM")]
+    [InlineData("Clube do Remo", "Clube do Remo", "CRE", "Remo", "REM")]
+    [InlineData("CA Mineiro", "Mineiro", "CAM", "Atlético-MG", "CAM")]
+    [InlineData("Coritiba FBC", "Coritiba", "COR", "Coritiba", "CFC")]
+    [InlineData("Grêmio FBPA", "Grêmio", "FBP", "Grêmio", "GRE")]
+    [InlineData("SC Internacional", "Internacional", "SCI", "Internacional", "INT")]
+    [InlineData("SC Corinthians Paulista", "Corinthians", "COR", "Corinthians", "COR")]
     [InlineData("São Paulo FC", "Sao Paulo", "SPF", "Sao Paulo", "SAO")]
     [InlineData("SE Palmeiras", "Palmeiras", "PAL", "Palmeiras", "PAL")]
     public void Ajusta_nome_curto_e_sigla_dos_clubes(

@@ -17,8 +17,12 @@ public static class Conversao
         StringComparer.Create(CultureInfo.InvariantCulture, CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace))
     {
         ["Paranaense"] = new(NomeCurto: "Athletico-PR"),
-        ["Clube do Remo"] = new(NomeCurto: "Remo"),
+        ["Mineiro"] = new(NomeCurto: "Atlético-MG"),
+        ["Clube do Remo"] = new(NomeCurto: "Remo", Sigla: "REM"),
         ["São Paulo"] = new(Sigla: "SAO"),
+        ["Coritiba"] = new(Sigla: "CFC"), // o Corinthians também vem como COR
+        ["Grêmio"] = new(Sigla: "GRE"),
+        ["Internacional"] = new(Sigla: "INT"),
     };
 
     public static NomesTime Nomes(TimeFd time)
