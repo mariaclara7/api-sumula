@@ -7,7 +7,9 @@
     "directory": "./saida",
     // Endereço que não existe responde 404 (não há página de fallback: aqui só há dados).
     "not_found_handling": "none"
-  }
-  // Depois que o domínio estiver na Cloudflare, descomente para servir em dados.<domínio>:
-  // , "routes": [{ "pattern": "dados.sumula.com.br", "custom_domain": true }]
+  },
+  // Os dados ficam em dados.brasumula.com.br. A Cloudflare cria o DNS e o certificado sozinha.
+  "routes": [{ "pattern": "dados.brasumula.com.br", "custom_domain": true }],
+  // Mantém também o endereço sumula-dados.brasumula.workers.dev.
+  "workers_dev": true
 }
