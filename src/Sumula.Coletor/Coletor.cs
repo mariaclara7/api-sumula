@@ -81,6 +81,9 @@ public class Coletor(
             }
 
             var nomes = Conversao.Nomes(time);
+            // Mostra no log como cada clube vem da fonte, para facilitar ajustar nomes em Conversao.Nomes.
+            logger.LogInformation("Time {Id}: name \"{Name}\", shortName \"{ShortName}\", tla \"{Tla}\" -> \"{NomeCurto}\" ({Sigla})",
+                id, time.Name, time.ShortName, time.Tla, nomes.NomeCurto, nomes.Sigla);
             entidade.Nome = nomes.Nome;
             entidade.NomeCurto = nomes.NomeCurto;
             entidade.Sigla = nomes.Sigla;
