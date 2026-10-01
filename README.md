@@ -13,7 +13,7 @@ GitHub Actions (a cada 3h)
    ├─► Sumula.Coletor ──► football-data.org
    │        │
    │        ▼
-   │   Postgres (Neon)
+   │   Postgres descartável (só existe durante o job)
    │        │
    ├─► Sumula.Exportador: sobe a Sumula.Api em memória, chama cada endereço
    │   que o site usa e grava as respostas como arquivos .json
@@ -26,6 +26,11 @@ GitHub Actions (a cada 3h)
 Como os dados só mudam quando o coletor roda, a API é "pré-calculada": em produção não há servidor .NET
 ligado, só arquivos na Cloudflare. A `Sumula.Api` continua sendo a fonte da verdade (o exportador chama ela
 mesma) e é usada ao vivo no desenvolvimento.
+
+Também não há banco em produção: o football-data.org entrega a temporada inteira a cada chamada, então o coletor
+refaz tudo a cada execução num Postgres que o GitHub Actions sobe e apaga no fim do job. Se um dia for preciso
+guardar algo entre as coletas (dados que a API não devolve de novo), basta apontar `ConnectionStrings__Sumula`
+para um banco fixo, como o Neon.
 
 | Projeto | O que faz |
 |---|---|
@@ -133,8 +138,8 @@ O time que marcou é deduzido do placar logo depois de cada gol, então gol cont
 Tudo gratuito, a não ser o domínio. O passo a passo completo (Cloudflare, Neon, domínio) está no README do
 repositório [sumula](https://github.com/mariaclara7/sumula#publicação). Resumo do que este repositório precisa:
 
-- **Secrets** (*Settings → Secrets and variables → Actions*): `FOOTBALL_DATA_TOKEN`, `DATABASE_URL` (Neon),
-  `CLOUDFLARE_API_TOKEN` e `CLOUDFLARE_ACCOUNT_ID`.
+- **Secrets** (*Settings → Secrets and variables → Actions*): `FOOTBALL_DATA_TOKEN`, `CLOUDFLARE_API_TOKEN` e
+  `CLOUDFLARE_ACCOUNT_ID`.
 - O workflow **Coletor** roda a cada 3 horas (ou na mão, na aba *Actions*): coleta, gera os arquivos e publica o
   Worker `sumula-dados`.
 

@@ -1,10 +1,10 @@
 name: Coletor
 
-# Busca os dados no football-data.org, atualiza o banco, gera a "API pré-calculada" (arquivos .json)
-# e publica na Cloudflare como o Worker "sumula-dados".
+# Busca os dados no football-data.org, gera a "API pré-calculada" (arquivos .json) e publica na Cloudflare
+# como o Worker "sumula-dados".
 #
 # Secrets (Settings > Secrets and variables > Actions > Secrets):
-#   FOOTBALL_DATA_TOKEN, DATABASE_URL, CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID
+#   FOOTBALL_DATA_TOKEN, CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID
 # Variável opcional (aba Variables): FOOTBALL_DATA_DETALHADO = true com o plano "Free + Deep Data",
 # para coletar os gols com minuto.
 on:
@@ -19,18 +19,31 @@ concurrency:
 jobs:
   coletar:
     runs-on: ubuntu-latest
+    # Cada coleta busca a temporada inteira de novo, então o banco só precisa existir durante a execução:
+    # um Postgres descartável, que some quando o job termina.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: sumula
+          POSTGRES_USER: sumula
+          POSTGRES_PASSWORD: sumula
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      ConnectionStrings__Sumula: Host=localhost;Database=sumula;Username=sumula;Password=sumula
     steps:
       # Sem os secrets, o workflow termina sem erro e avisa o que falta (em vez de falhar a cada 3 horas).
       - name: Verifica a configuração
         id: config
         run: |
-          faltam=""
-          [ -z "$DATABASE_URL" ] && faltam="$faltam DATABASE_URL"
-          [ -z "$FD_TOKEN" ] && faltam="$faltam FOOTBALL_DATA_TOKEN"
-          if [ -z "$faltam" ]; then echo "coleta=true" >> "$GITHUB_OUTPUT"
-          else echo "::notice::Faltam os secrets:$faltam. A coleta não vai rodar (veja o README)."; fi
+          if [ -n "$FD_TOKEN" ]; then echo "coleta=true" >> "$GITHUB_OUTPUT"
+          else echo "::notice::Falta o secret FOOTBALL_DATA_TOKEN. A coleta não vai rodar (veja o README)."; fi
           if [ -n "$CF_TOKEN" ] && [ -n "$CF_CONTA" ]; then echo "cloudflare=true" >> "$GITHUB_OUTPUT"
           else echo "::notice::Faltam CLOUDFLARE_API_TOKEN e CLOUDFLARE_ACCOUNT_ID: os dados não serão publicados."; fi
         env:
