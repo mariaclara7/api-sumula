@@ -2,7 +2,7 @@ name: Candidatos de foto (temporário)
 on:
   push:
     branches: [fotos-candidatas]
-    paths-ignore: ["candidatos/**"]
+    paths-ignore: ["candidatos/**", "precisa/**"]
 permissions:
   contents: write
 jobs:
@@ -10,12 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: python3 ferramentas/candidatos.py
+      - run: python3 ferramentas/precisa.py
         env:
           FD_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
       - run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add candidatos
+          git add precisa
           git commit -m "Candidatos de foto"
           git push
