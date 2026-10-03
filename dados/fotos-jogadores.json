@@ -13,7 +13,15 @@
     },
     "1077": {
       "nome": "Pedro",
-      "verificadoEm": "2026-10-03"
+      "wikidata": "Q47491410",
+      "foto": {
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/87/Pedro_in_a_match_for_Flamengo7658.png/500px-Pedro_in_a_match_for_Flamengo7658.png",
+        "pagina": "https://commons.wikimedia.org/wiki/File:Pedro_in_a_match_for_Flamengo7658.png",
+        "autor": "Jester77aa08",
+        "licenca": "CC BY-SA 4.0"
+      },
+      "verificadoEm": "2026-10-03",
+      "manual": true
     },
     "1129": {
       "nome": "Alerrandro",
@@ -68,12 +76,13 @@
       "nome": "Gabriel Barbosa",
       "wikidata": "Q13646572",
       "foto": {
-        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c3/Gabriel_2020.jpg/500px-Gabriel_2020.jpg",
-        "pagina": "https://commons.wikimedia.org/wiki/File:Gabriel_2020.jpg",
-        "autor": "Palácio do Planalto",
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a1/Gabriel_Barbosa%2C_atacante_do_Santos_%2844726855681%29.jpg/500px-Gabriel_Barbosa%2C_atacante_do_Santos_%2844726855681%29.jpg",
+        "pagina": "https://commons.wikimedia.org/wiki/File:Gabriel_Barbosa,_atacante_do_Santos_(44726855681).jpg",
+        "autor": "Douglas Teixeira from Santos, Brasil",
         "licenca": "CC BY 2.0"
       },
-      "verificadoEm": "2026-10-03"
+      "verificadoEm": "2026-10-03",
+      "manual": true
     },
     "1439": {
       "nome": "Juninho Capixaba",
@@ -754,7 +763,8 @@
     },
     "192070": {
       "nome": "Kevin Viveros",
-      "verificadoEm": "2026-10-03"
+      "verificadoEm": "2026-10-03",
+      "manual": true
     },
     "203341": {
       "nome": "Cauan Lucas",
