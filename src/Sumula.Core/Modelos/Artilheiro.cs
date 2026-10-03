@@ -7,4 +7,5 @@ public sealed record Artilheiro(
     int? Jogos,
     int Gols,
     int? Assistencias,
-    int? Penaltis);
+    int? Penaltis,
+    FotoJogador? Foto = null);

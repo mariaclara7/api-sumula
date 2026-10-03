@@ -5,6 +5,10 @@
     <ProjectReference Include="..\Sumula.Data\Sumula.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\dados\fotos-jogadores.json" LogicalName="fotos-jogadores.json" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>

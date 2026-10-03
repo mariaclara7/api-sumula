@@ -132,8 +132,8 @@ public static class Endpoints
             return Results.Ok(SimuladorCampeonato.Simular(dados.Times, dados.Partidas, semente: semente));
         });
 
-        grupo.MapGet("/artilharia", async (string competicao, int temporada, RepositorioSumula repo, CancellationToken ct) =>
-            Results.Ok(await repo.ObterArtilhariaAsync(Codigo(competicao), temporada, ct)));
+        grupo.MapGet("/artilharia", async (string competicao, int temporada, RepositorioSumula repo, CatalogoFotos fotos, CancellationToken ct) =>
+            Results.Ok((await repo.ObterArtilhariaAsync(Codigo(competicao), temporada, ct)).Select(fotos.ComFoto)));
     }
 
     private static string Codigo(string competicao) => competicao.ToUpperInvariant();

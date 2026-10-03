@@ -14,6 +14,7 @@ public static class AplicacaoApi
     {
         builder.Services.AddDbContext<SumulaDbContext>(o => o.UsarPostgres(ConexaoPostgres.Obter(builder.Configuration)));
         builder.Services.AddScoped<RepositorioSumula>();
+        builder.Services.AddSingleton<CatalogoFotos>();
 
         builder.Services.ConfigureHttpJsonOptions(o =>
             o.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)));

@@ -36,4 +36,9 @@ public sealed record ArtilheiroFd(
     int? Assists,
     int? Penalties);
 
-public sealed record JogadorFd(int Id, string Name);
+public sealed record JogadorFd(
+    int Id,
+    string Name,
+    string? FirstName = null,
+    string? LastName = null,
+    DateOnly? DateOfBirth = null);

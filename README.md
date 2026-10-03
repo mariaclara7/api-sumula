@@ -36,7 +36,8 @@ para um banco fixo, como o Neon.
 |---|---|
 | `src/Sumula.Core` | Modelos e cálculos (classificação, turnos, confronto direto, evolução, simulação, palpites...). Não depende de banco nem de API. |
 | `src/Sumula.Data` | EF Core + Postgres: entidades, migrations e consultas. |
-| `src/Sumula.Coletor` | Programa de linha de comando que busca os dados no football-data.org e grava no banco. Aplica as migrations ao iniciar. |
+| `src/Sumula.Coletor` | Programa de linha de comando que busca os dados no football-data.org e grava no banco. Aplica as migrations ao iniciar. Com `-- fotos`, procura as fotos dos jogadores. |
+| `dados/fotos-jogadores.json` | Fotos dos jogadores (veja "Fotos dos jogadores"). |
 | `src/Sumula.Api` | API HTTP (ASP.NET Minimal API). |
 | `src/Sumula.Exportador` | Gera os arquivos estáticos da API (`RotasEstaticas` lista os endereços e dá nome a cada arquivo). |
 | `publicacao/` | Configuração do Worker `sumula-dados` na Cloudflare. |
@@ -85,7 +86,7 @@ Série A no football-data.org.
 | `GET /matematica` | O que já está decidido: melhor e pior posição possível de cada time e quantos pontos garantem terminar entre os k primeiros (`pontosParaGarantir[k-1]`). |
 | `GET /estatisticas` | Perfil de gols de cada time (jogos sem sofrer gol, sem marcar, mais de 2,5 gols, ambos marcam), sequências atuais e maiores da temporada, e o resumo da liga. |
 | `GET /probabilidades` | Chance de cada time terminar em cada posição, pontos e posição esperados (veja abaixo). |
-| `GET /artilharia` | Artilheiros (gols, assistências e pênaltis). |
+| `GET /artilharia` | Artilheiros (gols, assistências e pênaltis), com a foto quando houver. |
 | `GET /health` | Verificação de saúde (fora do prefixo `/api`). |
 
 As respostas ficam 5 minutos em cache, já que os dados só mudam quando o coletor roda.
@@ -132,6 +133,36 @@ O time que marcou é deduzido do placar logo depois de cada gol, então gol cont
 
 > A leitura dos gols foi testada com dados no formato da documentação do football-data.org, não com a API real
 > (que exige o plano pago). Na primeira coleta com o plano, confira se os totais de `/tempos` batem com a tabela.
+
+### Fotos dos jogadores
+
+O football-data.org não tem fotos. Elas vêm do **Wikimedia Commons**, que só tem imagens com licença livre:
+
+1. O workflow **Fotos** (toda segunda-feira, ou na mão na aba *Actions*) roda
+   `dotnet run --project src/Sumula.Coletor -- fotos`. Para cada artilheiro, procura no Wikidata um jogador de
+   futebol com o mesmo nome e **a mesma data de nascimento** (o nome sozinho erra com homônimos) e pega a imagem
+   principal do item (P18), com autor e licença.
+2. O resultado vai para `dados/fotos-jogadores.json`, que fica no repositório. Se mudou, o workflow faz o commit
+   e dispara o Coletor, que publica. Quem não tem foto é procurado de novo depois de 30 dias.
+3. A API embute o arquivo e devolve `foto` (url, página, autor e licença) em `/artilharia`. O site mostra a foto
+   no card do jogador e no pódio, sempre com o crédito: as licenças CC BY e CC BY-SA exigem.
+
+Para trocar uma foto errada ou colocar uma que a busca não achou, edite o jogador no arquivo e marque
+`"manual": true`; a busca automática nunca mexe nessas entradas. Use só imagens que você tem direito de usar:
+
+```json
+"12345": {
+  "nome": "Fulano",
+  "foto": {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/.../480px-Fulano.jpg",
+    "pagina": "https://commons.wikimedia.org/wiki/File:Fulano.jpg",
+    "autor": "Nome do fotógrafo",
+    "licenca": "CC BY-SA 4.0"
+  },
+  "verificadoEm": "2026-10-03",
+  "manual": true
+}
+```
 
 ## Publicação
 

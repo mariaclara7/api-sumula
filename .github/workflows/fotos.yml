@@ -1,0 +1,59 @@
+name: Fotos
+
+# Procura fotos com licença livre (Wikimedia Commons) para os artilheiros e atualiza dados/fotos-jogadores.json.
+# Se o arquivo mudar, faz o commit na main e roda o Coletor, que publica as fotos novas.
+# Para corrigir uma foto à mão, edite o arquivo e marque o jogador com "manual": true (veja o README).
+on:
+  schedule:
+    - cron: "41 6 * * 1" # segundas-feiras
+  workflow_dispatch:
+
+permissions:
+  contents: write # commit do arquivo de fotos
+  actions: write # disparar o Coletor
+
+concurrency:
+  group: fotos
+  cancel-in-progress: false
+
+jobs:
+  fotos:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verifica a configuração
+        id: config
+        run: |
+          if [ -n "$FD_TOKEN" ]; then echo "pronto=true" >> "$GITHUB_OUTPUT"
+          else echo "::notice::Falta o secret FOOTBALL_DATA_TOKEN. A busca de fotos não vai rodar."; fi
+        env:
+          FD_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
+      - uses: actions/checkout@v4
+        if: steps.config.outputs.pronto == 'true'
+      - uses: actions/setup-dotnet@v4
+        if: steps.config.outputs.pronto == 'true'
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Procura as fotos
+        if: steps.config.outputs.pronto == 'true'
+        run: dotnet run --project src/Sumula.Coletor -c Release -- fotos
+        env:
+          FootballData__Token: ${{ secrets.FOOTBALL_DATA_TOKEN }}
+
+      - name: Salva no repositório
+        id: salvar
+        if: steps.config.outputs.pronto == 'true'
+        run: |
+          if git diff --quiet -- dados/fotos-jogadores.json; then echo "Nenhuma mudança nas fotos."; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dados/fotos-jogadores.json
+          git commit -m "Atualiza as fotos dos jogadores"
+          git push
+          echo "mudou=true" >> "$GITHUB_OUTPUT"
+
+      - name: Publica com as fotos novas
+        if: steps.salvar.outputs.mudou == 'true'
+        run: gh workflow run coletor.yml --ref main
+        env:
+          GH_TOKEN: ${{ github.token }}
