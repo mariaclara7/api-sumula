@@ -23,7 +23,9 @@ for jid, nome, nomes, clubes in ALVOS:
     for n in nomes:
         for c in clubes[:2]:
             for q in (f'intitle:"{n}" "{c}"', f'"{n}" "{c}"'):
-                for r in api(action="query", list="search", srnamespace=6, srlimit=50, srsearch=q)["query"]["search"]:
+                resp = api(action="query", list="search", srnamespace=6, srlimit=50, srsearch=q)
+                if "query" not in resp: print("  busca falhou:", q, resp.get("error")); continue
+                for r in resp["query"]["search"]:
                     titulos.add(r["title"])
     titulos = sorted(titulos); achados = []
     for i in range(0, len(titulos), 40):
