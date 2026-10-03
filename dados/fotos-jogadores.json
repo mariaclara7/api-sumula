@@ -368,13 +368,8 @@
     "37833": {
       "nome": "Carlos Vinícius",
       "wikidata": "Q35694605",
-      "foto": {
-        "url": "https://upload.wikimedia.org/wikipedia/commons/7/77/Carlos_Vin%C3%ADcius_3_Benfica-Zenit_UCL201920_%28cropped%29.jpg",
-        "pagina": "https://commons.wikimedia.org/wiki/File:Carlos_Vin%C3%ADcius_3_Benfica-Zenit_UCL201920_(cropped).jpg",
-        "autor": "Anton Zaitsev",
-        "licenca": "CC BY-SA 3.0"
-      },
-      "verificadoEm": "2026-10-03"
+      "verificadoEm": "2026-10-03",
+      "manual": true
     },
     "39954": {
       "nome": "Everaldo",
@@ -388,18 +383,20 @@
     },
     "42901": {
       "nome": "Luciano",
-      "verificadoEm": "2026-10-03"
+      "foto": {
+        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bb/Luciano-Sao-Paulo-Juventude-jun-2022_%28cropped%29.jpg/500px-Luciano-Sao-Paulo-Juventude-jun-2022_%28cropped%29.jpg",
+        "pagina": "https://commons.wikimedia.org/wiki/File:Luciano-Sao-Paulo-Juventude-jun-2022_(cropped).jpg",
+        "autor": "SOCCER DIGITAL",
+        "licenca": "Public domain"
+      },
+      "verificadoEm": "2026-10-03",
+      "manual": true
     },
     "45490": {
       "nome": "Matheus Pereira",
       "wikidata": "Q15831118",
-      "foto": {
-        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d5/Matheus_Pereira.jpg/500px-Matheus_Pereira.jpg",
-        "pagina": "https://commons.wikimedia.org/wiki/File:Matheus_Pereira.jpg",
-        "autor": "Silesia711",
-        "licenca": "CC BY-SA 4.0"
-      },
-      "verificadoEm": "2026-10-03"
+      "verificadoEm": "2026-10-03",
+      "manual": true
     },
     "46266": {
       "nome": "Tomás Cuello",
@@ -594,7 +591,8 @@
     },
     "140873": {
       "nome": "Luciano Juba",
-      "verificadoEm": "2026-10-03"
+      "verificadoEm": "2026-10-03",
+      "manual": true
     },
     "145985": {
       "nome": "Hércules",
@@ -610,12 +608,14 @@
         "autor": "Bryan Berlin",
         "licenca": "CC BY-SA 4.0"
       },
-      "verificadoEm": "2026-10-03"
+      "verificadoEm": "2026-10-03",
+      "manual": true
     },
     "157533": {
       "nome": "John Kennedy",
       "wikidata": "Q105393903",
-      "verificadoEm": "2026-10-03"
+      "verificadoEm": "2026-10-03",
+      "manual": true
     },
     "168807": {
       "nome": "Vitor Bueno",
@@ -698,13 +698,8 @@
     "178710": {
       "nome": "Samuel Lino",
       "wikidata": "Q67222776",
-      "foto": {
-        "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7a/Samuel_Lino%2C_FC_Salzburg_vs._Atletico_Madrid_%282025-01-29_UEFA_Championsleague%29_83_%28cropped%29.jpg/500px-Samuel_Lino%2C_FC_Salzburg_vs._Atletico_Madrid_%282025-01-29_UEFA_Championsleague%29_83_%28cropped%29.jpg",
-        "pagina": "https://commons.wikimedia.org/wiki/File:Samuel_Lino,_FC_Salzburg_vs._Atletico_Madrid_(2025-01-29_UEFA_Championsleague)_83_(cropped).jpg",
-        "autor": "Werner100359",
-        "licenca": "CC BY-SA 4.0"
-      },
-      "verificadoEm": "2026-10-03"
+      "verificadoEm": "2026-10-03",
+      "manual": true
     },
     "178854": {
       "nome": "Victor Hugo Gomes",
