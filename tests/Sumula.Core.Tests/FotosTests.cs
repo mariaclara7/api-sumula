@@ -33,7 +33,7 @@ public class FotosTests
     private const string FotoHulk = """
         {"query":{"pages":[{"title":"File:Hulk 2024.jpg","imageinfo":[{
           "url":"https://upload.wikimedia.org/wikipedia/commons/a/ab/Hulk_2024.jpg",
-          "thumburl":"https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Hulk_2024.jpg/480px-Hulk_2024.jpg",
+          "thumburl":"https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Hulk_2024.jpg/480px-Hulk_2024.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo",
           "descriptionurl":"https://commons.wikimedia.org/wiki/File:Hulk_2024.jpg",
           "extmetadata":{
             "Artist":{"value":"<a href=\"//commons.wikimedia.org/wiki/User:Fot%C3%B3grafo\">Jo&atilde;o   Fot&oacute;grafo</a>"},
@@ -65,6 +65,13 @@ public class FotosTests
             "João Fotógrafo",
             "CC BY-SA 4.0"), foto);
     }
+
+    [Theory]
+    [InlineData("https://x/a.jpg?utm_source=c&utm_content=t", "https://x/a.jpg")]
+    [InlineData("https://x/a.jpg?v=2&utm_source=c", "https://x/a.jpg?v=2")]
+    [InlineData("https://x/a.jpg", "https://x/a.jpg")]
+    public void Tira_os_parametros_de_rastreio(string url, string esperado) =>
+        Assert.Equal(esperado, LeituraWikimedia.SemRastreio(url));
 
     [Theory]
     [InlineData("+1986-07-25T00:00:00Z", "1986-07-25")]

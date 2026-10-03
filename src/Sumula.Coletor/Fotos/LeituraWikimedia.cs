@@ -51,7 +51,7 @@ public static partial class LeituraWikimedia
                 continue;
 
             var info = infos[0];
-            var url = Texto(info, "thumburl") ?? Texto(info, "url");
+            var url = SemRastreio(Texto(info, "thumburl") ?? Texto(info, "url"));
             var descricao = Texto(info, "descriptionurl");
             if (url is null || descricao is null)
                 continue;
@@ -71,6 +71,19 @@ public static partial class LeituraWikimedia
         tempo is { Length: >= 11 } && DateOnly.TryParseExact(tempo.Substring(1, 10), "yyyy-MM-dd", out var data)
             ? data
             : null;
+
+    /// <summary>A miniatura vem com parâmetros de rastreio (utm_source...), que não servem para nada aqui.</summary>
+    public static string? SemRastreio(string? url)
+    {
+        var inicio = url?.IndexOf('?') ?? -1;
+        if (url is null || inicio < 0)
+            return url;
+
+        var parametros = url[(inicio + 1)..].Split('&')
+            .Where(p => p.Length > 0 && !p.StartsWith("utm_", StringComparison.OrdinalIgnoreCase));
+        var busca = string.Join('&', parametros);
+        return busca.Length == 0 ? url[..inicio] : $"{url[..inicio]}?{busca}";
+    }
 
     /// <summary>O Commons devolve o autor em HTML (às vezes com link): fica só o texto.</summary>
     public static string? SemHtml(string? html)
